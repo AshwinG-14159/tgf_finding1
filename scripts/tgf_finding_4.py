@@ -12,107 +12,6 @@ import time
 from scipy.ndimage import label
 
 
-def debug(context, data):
-    f = open(f'Debug/{context}', 'a')
-    f.write(data)
-    f.close()
-
-def txy(mkffile, trigtime, ra_tran, dec_tran):
-    """
-    Calculate thetax, thetay using astropy
-    Use pitch, roll and yaw information from the MKF file
-    """
-    # x = -yaw
-    # y = +pitch
-    # z = +roll
-
-    # Read in the MKF file
-    mkfdata = fits.getdata(mkffile, 1)
-    # print(f'mkf data: {mkfdata}')
-    # sel = abs(mkfdata['time'] - trigtime) < 10
-    
-    # try:
-    #     ind = np.where(sel==True)[0][0]
-    
-    # except IndexError:
-
-    #     print("\nEither the time tagged data you are looking for is not in this file or CZTI might be in SAA. Please check using the script SAA_finder.py\n")
-    #     raise SystemExit
-
-    # Get pitch, roll, yaw
-    # yaw is minus x
-    try:
-        pitch = coo.SkyCoord( mkfdata['pitch_ra'] * u.deg, mkfdata['pitch_dec'] * u.deg )
-        roll = coo.SkyCoord( mkfdata['roll_ra'] * u.deg, mkfdata['roll_dec'] * u.deg )
-        yaw_ra  = (180.0 + mkfdata['yaw_ra'] ) % 360
-        yaw_dec = mkfdata['yaw_dec']
-        minus_yaw = coo.SkyCoord( yaw_ra * u.deg, yaw_dec * u.deg )
-
-        # Transient:
-        transient = coo.SkyCoord(ra_tran * u.deg, dec_tran * u.deg)
-
-        #Earth:
-        earthx = mkfdata['posx'] * u.km
-        earthy = mkfdata['posy'] * u.km
-        earthz = mkfdata['posz'] * u.km
-        earth = coo.SkyCoord(-earthx, -earthy, -earthz, frame='icrs', representation_type='cartesian')
-        earth_czti = np.sqrt(earthz**2 + earthy**2 + earthx**2)
-        earth_transient = earth.separation(transient).value
-
-        # Angles from x, y, z axes are:
-        ax = minus_yaw.separation(transient)
-        ay = pitch.separation(transient)
-        az = roll.separation(transient)
-
-        # the components are:
-        cx = np.cos(ax.radian) # The .radian is not really needed, but anyway...
-        cy = np.cos(ay.radian)
-        cz = np.cos(az.radian)
-
-        # Thetax = angle from z axis in ZX plane
-        # lets use arctan2(ycoord, xcoord) for this
-        thetax = u.rad * np.arctan2(cx, cz)
-        thetay = u.rad * np.arctan2(cy, cz)
-        phi = np.arctan2(cy,cx)
-        phi_new = phi*(u.rad.to(u.deg))
-        # Theta and phi of Earths Centre:
-        axn = minus_yaw.separation(earth)
-        ayn=pitch.separation(earth)
-        azn=roll.separation(earth)
-
-        cxn = np.cos(axn.radian)
-        cyn = np.cos(ayn.radian)
-        czn  = np.cos(azn.radian)
-        phin = np.arctan2(cy,cx)
-        phi_newn = phin*(u.rad.to(u.deg))
-        print("Theta of earth is:",azn.value)
-        print("Phi of Earth is:",phi_newn)
-
-        try:
-            for i,j in enumerate(phi_new):
-                if (j < 0 ):
-                    phi_new[i] = 360 + j
-                else:
-                    phi_new[i] = j
-        except TypeError:
-            if phi_new<0:
-                phi_new = 360.0 + phi_new
-            else:
-                phi_new = phi_new
-
-        earth_occult_angle = np.arcsin(con.R_earth/earth_czti)
-
-    except RuntimeWarning:
-
-        print("CZTI might be in SAA. Please check using the script SAA_finder.py")
-        raise SystemExit
-
-    return az.value, phi_new, thetax.to(u.deg).value, thetay.to(u.deg).value, minus_yaw, pitch, roll, transient, earth, earth_czti, earth_transient, earth_occult_angle.to(u.deg).value
-
-
-
-
-
 
 
 
@@ -131,15 +30,19 @@ with open('orbitinfo.csv', 'r') as f:
     r = csv.reader(f)
     t=0
     for row in r:
+
         if(t<1):
             t+=1
             continue
+        if(t%5!=0):
+            continue # selects one every 5 orbits, gives greater diversity in types of orbits
+        
         # print(float(row[5]))
-        if(float(row[5])>-65 and float(row[5])<65) and row[0][-6:]!='level2':
+        if(float(row[5])>-50 and float(row[5])<50) and row[0][-6:]!='level2':
             set_of_rows_occ.append(row)
         # if(float(row[5])<-60 or float(row[5])>60) and row[0][-6:]!='level2':
         #     set_of_rows_polar.append(row)
-        if(t>3000):
+        if(t>10000):
             break
         t+=1
 
@@ -148,7 +51,7 @@ print("file reading time:",time.time()-t_script_start)
 print("number of orbits to work with: ", len(set_of_rows_occ))
 
 path = "/mnt/nas2_czti/czti/"
-
+path_tables = "../data/tables"
 # f = open('TGFs_Analysed_durations_ver7.txt','w' )
 
 t_comp_start = time.time()
@@ -189,8 +92,6 @@ for row in set_of_rows_occ:
     mask_z = z_arr!=0
     mask_time = time_arr_og>0
     mask_coord = mask_x & mask_y & mask_z & mask_time #use this mask later
-
-
 
 
     r_arr = np.sqrt(np.square(x_arr)+np.square(y_arr)+np.square(z_arr))
@@ -259,11 +160,11 @@ for row in set_of_rows_occ:
                 # plt.savefig(f"plots/{row[0]}_{quarter}_separation.png")
                 # plt.cla()
 
-
-                labels, num_features = label(sep_arr_here>105)
+                #computed 70 and 110 by checking size of earth and orbital radius of czti to get an idea of what kinds of angles would be certainly earth occulted
+                labels, num_features = label(sep_arr_here>110)
                 free = [np.where(labels == label_id)[0] for label_id in range(1, num_features + 1)]
 
-                labels, num_features = label(sep_arr_here<75)
+                labels, num_features = label(sep_arr_here<70)
                 occ = [np.where(labels == label_id)[0] for label_id in range(1, num_features + 1)]
 
                 if(len(occ)==0 and len(free)==0):
@@ -456,13 +357,13 @@ for row in set_of_rows_occ:
         header['DURATION'] = k_net.shape[1]
         hdu = fits.BinTableHDU.from_columns(col_arr, header=header)
         hdu.writeto(
-            f"tables/{binning}/{row[0][:-6]}_{row[0][-5:]}_V1.0_{binning}_3_CoincSigmaTable_V2_{names_of_regions[k_index]}_ver7.fits",
+            f"{path_tables}/{binning}/{row[0][:-6]}_{row[0][-5:]}_V1.0_{binning}_3_CoincSigmaTable_V2_{names_of_regions[k_index]}_ver1.fits",
             overwrite=True,
         )
         # print(Coi)
         print(names_of_regions[mark], Coinc_Tables[mark]/Analysed_Durations[mark])
         # print('writing: ', coinc_sigma_table)
-        print('writing data to: ', f"tables/{binning}/{row[0][:-6]}_{row[0][-5:]}_V1.0_{binning}_3_CoincSigmaTable_V2_{names_of_regions[k_index]}_ver7.fits")
+        print('writing data to: ', f"{path_tables}/{binning}/{row[0][:-6]}_{row[0][-5:]}_V1.0_{binning}_3_CoincSigmaTable_V2_{names_of_regions[k_index]}_ver7.fits")
         # print(names_of_regions[mark], Coinc_Tables[mark])
 
         # f.write(f'{names_of_regions[mark]}, {coinc_sigma_table}\n')
