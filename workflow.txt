@@ -1,0 +1,16 @@
+Oct 7
+
+1) Old Project recheck and finalize. Use function from angles to get angle of separation.
+It generally needs time to be given though. Create a version that can work with arrays. 
+Just copy paste the function into another version and use that version. First Run today, Saturday-Sunday. 
+Second run tomorrow Sunday-Monday.
+
+2) New project, sanity check on angle of earth and pointing. Second Task.
+Deadline - Wednesday
+
+
+
+
+
+
+
