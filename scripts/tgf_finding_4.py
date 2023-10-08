@@ -26,25 +26,31 @@ names_of_regions=['occ', 'occ_free', 'free', 'free_occ']
 binning = 0.001
 
 
-with open('orbitinfo.csv', 'r') as f:
+with open('../data/orbitinfo.csv', 'r') as f:
     r = csv.reader(f)
-    t=0
+    count=0
     for row in r:
 
-        if(t<1):
-            t+=1
+        if(count<1):
+            count+=1
             continue
-        if(t%5!=0):
-            continue # selects one every 5 orbits, gives greater diversity in types of orbits
+        # if(t%5!=0):
+        #     continue # selects one every 5 orbits, gives greater diversity in types of orbits
         
         # print(float(row[5]))
         if(float(row[5])>-50 and float(row[5])<50) and row[0][-6:]!='level2':
+            if(count%5!=0):
+                count+=1
+                continue
             set_of_rows_occ.append(row)
+            count+=1
+            if(count/5>100):
+                break
         # if(float(row[5])<-60 or float(row[5])>60) and row[0][-6:]!='level2':
         #     set_of_rows_polar.append(row)
-        if(t>10000):
-            break
-        t+=1
+        # if(t>10000):
+        #     break
+        # t+=1
 
 
 print("file reading time:",time.time()-t_script_start)
@@ -363,7 +369,7 @@ for row in set_of_rows_occ:
         # print(Coi)
         print(names_of_regions[mark], Coinc_Tables[mark]/Analysed_Durations[mark])
         # print('writing: ', coinc_sigma_table)
-        print('writing data to: ', f"{path_tables}/{binning}/{row[0][:-6]}_{row[0][-5:]}_V1.0_{binning}_3_CoincSigmaTable_V2_{names_of_regions[k_index]}_ver7.fits")
+        print('writing data to: ', f"{path_tables}/{binning}/{row[0][:-6]}_{row[0][-5:]}_V1.0_{binning}_3_CoincSigmaTable_V2_{names_of_regions[k_index]}_ver1.fits")
         # print(names_of_regions[mark], Coinc_Tables[mark])
 
         # f.write(f'{names_of_regions[mark]}, {coinc_sigma_table}\n')
