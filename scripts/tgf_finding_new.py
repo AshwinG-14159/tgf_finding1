@@ -24,8 +24,9 @@ set_of_rows_occ = []
 set_of_rows_polar = []
 names_of_regions=['occ', 'occ_free', 'free', 'free_occ']
 binning = 0.001
-gap = 20
-total_attempts = 300
+gap = 30
+total_attempts = 400
+version = 4
 
 
 
@@ -62,27 +63,39 @@ t_comp_start = time.time()
 
 Coinc_Tables = []
 Analysed_Durations = []
-version = 3
 
 skip_till = ['20230329_A12_054T02_9000005550_level2_40553', 'A12_054T02_9000005550', 'priyanka_iucaa', 'SBS 0846+513', '132.4916', '51.1414', '5100.90680462', '2023-03-29T16:16:53', '2023-03-29T18:16:54']
 skipped = 1
 
+
+err_counts = {"mkf file error":0, 
+"coordinates error":0, 
+"evt file header messup": 0, 
+"evt file does not open":0,
+"histograms not present":0,
+"unable to make hists by region": 0}
+
+
+orbit_num=0
 for row in set_of_rows_occ:
+    orbit_num+=1
     if(row!=skip_till and not skipped):
         continue
     else:
         if(row==skip_till):
             skipped = 1
     t_row_start = time.time()
-
+    print("orbit num: ", orbit_num)
 
     print('trying to access row:', row)
     target_folder = path+f'level2/{row[0][:-6]}/czti/orbit/{row[0][-5:]}_V1.0'
     mkf_file = target_folder+f'/AS1{row[0][9:-13]}_{row[0][-5:]}czt_level2.mkf'
     evt_file = target_folder+f'/modeM0/AS1{row[0][9:-13]}_{row[0][-5:]}cztM0_level2_bc.evt'
+    
     try:
         tab = Table.read(mkf_file,1)
     except:
+        err_counts["mkf file error"]+=1
         continue
     x_arr,y_arr,z_arr = np.array(tab['POSX']),np.array(tab['POSY']),np.array(tab['POSZ'])
     time_arr_og = tab['TIME']
@@ -110,6 +123,7 @@ for row in set_of_rows_occ:
         Earth_center = SkyCoord(RA_arr*u.deg, dec_arr*u.deg, frame='icrs')
         sep_arr = Earth_center.separation(pointing).degree
     except:
+        err_counts["coordinates error"]+=1
         print('Something wrong with the coordinates') #trying to access row: ['20230329_A12_054T02_9000005550_level2_40553', 'A12_054T02_9000005550', 'priyanka_iucaa', 'SBS 0846+513', '132.4916', '51.1414', '5100.90680462', '2023-03-29T16:16:53', '2023-03-29T18:16:54']
         continue
 
@@ -136,6 +150,7 @@ for row in set_of_rows_occ:
                 except:
                     print('orbit data not extractable')
                     error_check = 1
+                    err_counts["evt file header messup"]+=1
                     break
                 # print(f"quadrant:{quarter}. Len before = {len(q_data)}. ", end='')
                 q_data = q_data[(q_data>start) & (q_data<end)]
@@ -232,6 +247,7 @@ for row in set_of_rows_occ:
 
     except:
         print("evt file not found")
+        err_counts["evt file does not open"]+=1
         continue
     if(error_check):
         continue
@@ -257,6 +273,7 @@ for row in set_of_rows_occ:
         print(hist.shape)
     except:
         print("4 histograms not present here")
+        err_counts["histograms not present"]+=1
         continue
 
     hists_by_reg = []
@@ -270,6 +287,8 @@ for row in set_of_rows_occ:
         try:
             hists_by_reg.append(hist[:, np.where(condition)[0]])
         except:
+            print("unable to make hists by region")
+            err_counts["unable to make hists by region"]+=1
             continue
     
     for i in range(len(hists_by_reg)):
@@ -335,8 +354,8 @@ for row in set_of_rows_occ:
 
     print("time to get tables: ", t_row_complete-t_row_hist_ready)
 
-
-print("total time to run code:", time.time - t_script_start)
+print(err_counts)
+print("total time to run code:", time.time() - t_script_start)
 
 
 

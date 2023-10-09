@@ -23,8 +23,8 @@ t_script_start=time.time()
 set_of_rows_occ = []
 set_of_rows_polar = []
 names_of_regions=['occ', 'occ_free', 'free', 'free_occ']
-gap = 10
-total_attempts = 200
+gap = 20
+total_attempts = 300
 version=2
 
 with open('../data/orbitinfo.csv', 'r') as f:
@@ -46,8 +46,9 @@ with open('../data/orbitinfo.csv', 'r') as f:
                 break
         # if(float(row[5])<-60 or float(row[5])>60) and row[0][-6:]!='level2':
         #     set_of_rows_polar.append(row)
-
-
+    else:
+        print("file ended")
+# exit(0)
 print("file reading time:",time.time()-t_script_start)
 print("number of orbits to work with: ", len(set_of_rows_occ))
 
@@ -56,8 +57,8 @@ names_of_regions=['occ', 'occ_free', 'free', 'free_occ']
 
 binning = 0.001
 mark=0
-path_to_tables = "../data/tables"
-path_to_plots = "../data/final_plots"
+path_to_tables = "../data/tables2"
+path_to_plots = "../data/final_plots2"
 total_duration_arr = [0,0,0,0]
 total_table = [0,0,0,0]
 
