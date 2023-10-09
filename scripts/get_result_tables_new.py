@@ -23,6 +23,9 @@ t_script_start=time.time()
 set_of_rows_occ = []
 set_of_rows_polar = []
 names_of_regions=['occ', 'occ_free', 'free', 'free_occ']
+gap = 10
+total_attempts = 200
+version=2
 
 with open('../data/orbitinfo.csv', 'r') as f:
     r = csv.reader(f)
@@ -34,12 +37,12 @@ with open('../data/orbitinfo.csv', 'r') as f:
             continue
         
         if(float(row[5])>-50 and float(row[5])<50) and row[0][-6:]!='level2':
-            if(count%5!=0):
+            if(count%gap!=0):
                 count+=1
                 continue
             set_of_rows_occ.append(row)
             count+=1
-            if(count/5>100):
+            if(count/gap>total_attempts):
                 break
         # if(float(row[5])<-60 or float(row[5])>60) and row[0][-6:]!='level2':
         #     set_of_rows_polar.append(row)
@@ -63,7 +66,7 @@ for row in set_of_rows_occ:
     print('name: ', row[0])
     found = 0
     for k_index in range(4):
-        table = f"{path_to_tables}/{binning}/{row[0][:-6]}_{row[0][-5:]}_V1.0_{binning}_3_CoincSigmaTable_V2_{names_of_regions[k_index]}_ver1.fits"
+        table = f"{path_to_tables}/{binning}/{row[0][:-6]}_{row[0][-5:]}_V1.0_{binning}_3_CoincSigmaTable_V2_{names_of_regions[k_index]}_ver{version}.fits"
         print('table to find: ', table)
         try:
             with fits.open(table) as hdul:
@@ -120,7 +123,7 @@ for quads in range(len(frequencies[0])):
     plt.xlabel("region")
     plt.ylabel("frequency of detections")
     plt.legend()
-    plt.savefig(f'{path_to_plots}/variation_{quads+1}_ver1.png')
+    plt.savefig(f'{path_to_plots}/variation_{quads+1}_ver{version}.png')
     plt.cla()
 
 

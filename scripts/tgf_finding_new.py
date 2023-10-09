@@ -24,8 +24,8 @@ set_of_rows_occ = []
 set_of_rows_polar = []
 names_of_regions=['occ', 'occ_free', 'free', 'free_occ']
 binning = 0.001
-gap = 10
-total_attempts = 200
+gap = 20
+total_attempts = 300
 
 
 
@@ -62,7 +62,7 @@ t_comp_start = time.time()
 
 Coinc_Tables = []
 Analysed_Durations = []
-version = 2
+version = 3
 
 skip_till = ['20230329_A12_054T02_9000005550_level2_40553', 'A12_054T02_9000005550', 'priyanka_iucaa', 'SBS 0846+513', '132.4916', '51.1414', '5100.90680462', '2023-03-29T16:16:53', '2023-03-29T18:16:54']
 skipped = 1
