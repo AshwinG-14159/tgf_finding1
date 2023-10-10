@@ -201,7 +201,7 @@ for row in set_of_rows_occ:
                 time_arr_here = time_arr_og[match_with_time_cond]
                 sep_arr_here = sep_arr[match_with_time_cond]
 
-                #computed 70 and 110 by checking size of earth and orbital radius of czti to get an idea of what kinds of angles would be certainly earth occulted
+                #computed 70 and 110 by checking size of earth and orbital radius of czti to get an idea of what kinds of angles would be earth occulted
                 labels, num_features = label(sep_arr_here>110)
                 free = [np.where(labels == label_id)[0] for label_id in range(1, num_features + 1)]
 

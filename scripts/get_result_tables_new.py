@@ -23,9 +23,9 @@ t_script_start=time.time()
 set_of_rows_occ = []
 set_of_rows_polar = []
 names_of_regions=['occ', 'occ_free', 'free', 'free_occ']
-gap = 20
-total_attempts = 300
-version=2
+gap = 30
+total_attempts = 400
+version=3
 
 with open('../data/orbitinfo.csv', 'r') as f:
     r = csv.reader(f)
