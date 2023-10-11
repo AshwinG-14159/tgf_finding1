@@ -23,15 +23,15 @@ t_script_start=time.time()
 set_of_rows_occ = []
 set_of_rows_polar = []
 names_of_regions=['occ', 'occ_free', 'free', 'free_occ']
-gap = 10
-total_attempts = 100
-version=1
+gap = 30
+total_attempts = 400
+version=3
 
-gap2 = 8
-attempts2 = 100
-version2 = 1
+gap2 = 26
+attempts2 = 400
+version2 = 3
 
-plot_version = 5
+plot_version = 7
 
 
 with open('../data/orbitinfo.csv', 'r') as f:
@@ -143,7 +143,8 @@ with open('../data/orbitinfo.csv', 'r') as f:
             count+=1
             if(count/gap2>attempts2): # leave 10 between any 2 and take a total of 200. Binning = 0.001
                 break
-
+    else:
+        print('csv ended')
 
 print('num of polar attempts: ', len(set_of_rows_polar))
 total_duration_arr = 0

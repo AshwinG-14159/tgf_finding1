@@ -25,9 +25,9 @@ set_of_rows_occ = []
 set_of_rows_polar = []
 # names_of_regions=['occ', 'occ_free', 'free', 'free_occ']
 binning = 0.001
-gap = 14
-total_attempts = 300
-version = 2
+gap = 13
+total_attempts = 400
+version = 3
 
 
 
