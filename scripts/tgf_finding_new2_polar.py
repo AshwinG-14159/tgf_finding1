@@ -15,10 +15,6 @@ from scipy.ndimage import label
 
 
 
-
-
-
-
 t_script_start=time.time()
 
 set_of_rows_occ = []
