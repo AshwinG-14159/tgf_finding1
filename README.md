@@ -34,7 +34,7 @@ version 1, gap = 8, runs=100
 version 2, gap = 14, runs = 300
 version 3, gap = 13, runs = 400
 
-plots - version 1,2,3 are without polar
+plots - 
 
 
 

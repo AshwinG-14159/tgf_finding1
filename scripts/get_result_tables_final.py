@@ -27,11 +27,11 @@ gap = 30
 total_attempts = 400
 version=3
 
-gap2 = 26
+gap2 = 13
 attempts2 = 400
 version2 = 3
 
-plot_version = 7
+plot_version = 3
 
 
 with open('../data/orbitinfo.csv', 'r') as f:
@@ -64,8 +64,8 @@ names_of_regions=['occ', 'occ_free', 'free', 'free_occ']
 
 binning = 0.001
 mark=0
-path_to_tables = "../data/tables2"
-path_to_plots = "../data/final_plots2"
+path_to_tables = "../data/tables_final"
+path_to_plots = "../data/final_plots"
 total_duration_arr = [0,0,0,0]
 total_table = [0,0,0,0]
 
